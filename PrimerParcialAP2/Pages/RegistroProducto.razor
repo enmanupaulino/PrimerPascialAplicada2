@@ -1,0 +1,137 @@
+﻿@page "/Registro"
+@using PrimerParcialAP2.Models
+@using PrimerParcialAP2.Controllers
+
+
+<h3>Registro</h3>
+
+<EditForm Model="@registros" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator/>
+
+    <div class="form-group">
+        <label for="Id"> Id</label>
+        <InputNumber @bind-Value="registros.Id" class="form-group"></InputNumber>
+        <ValidationMessage For="@(()=>registros.Id)"></ValidationMessage>
+
+    </div>
+    <div class="form-group">
+        <label for="Fecha"> Fecha</label>
+        <InputDate @bind-Value="registros.Fecha" class="form-group"></InputDate>
+        <ValidationMessage For="@(()=>registros.Fecha)"></ValidationMessage>
+
+    </div>
+    <div class="form-group">
+        <label for="Descripcion"> Descripcion</label>
+        <InputText @bind-Value="registros.Descripcion" class="form-group"></InputText>
+        <ValidationMessage For="@(()=>registros.Descripcion)"></ValidationMessage>
+
+    </div>
+    <div class="form-group">
+        <label for="Costo"> Costo</label>
+        <InputNumber @bind-Value="registros.Costo" @oninput="Calcular" class="form-group"></InputNumber>
+        <ValidationMessage For="@(()=>registros.Costo)"></ValidationMessage>
+
+    </div>
+    <div class="form-group">
+        <label for="Ganancia"> %Ganancia</label>
+        <InputNumber @bind-Value="registros.Ganancia" @oninput="Calcular" class="form-group"></InputNumber>
+        <ValidationMessage For="@(()=>registros.Ganancia)"></ValidationMessage>
+
+    </div>
+    <div class="form-group">
+        <label for="Precio"> Precio</label>
+        <InputNumber @bind-Value="registros.Precio" class="form-group"></InputNumber>
+        <ValidationMessage For="@(()=>registros.Precio)"></ValidationMessage>
+
+    </div>
+
+    <p for="mensaje">@mensaje</p>
+   
+    <button type="submit" class="btn btn-primary" @onclick="Guardar">Guardar</button>
+    <button class="btn btn-primary" @onclick="Buscar">Buscar</button>
+    <button class="btn btn-primary" @onclick="Eliminar">Eliminar</button>
+    <button class="btn btn-primary" @onclick="Limpiar">Limpiar</button>
+    
+
+
+
+</EditForm>
+
+
+@code {
+
+    private Registros registros = new Registros();
+    private string mensaje;
+
+
+    private void Limpiar()
+    {
+        registros = new Registros();
+        registros.Id = 0;
+        registros.Fecha = DateTime.Now;
+        registros.Costo = 0;
+        registros.Descripcion = string.Empty;
+        registros.Precio = 0;
+
+    }
+
+
+    private void Guardar() {
+
+        RegistroController registroController = new RegistroController();
+        if (registroController.Buscar(registros.Id) != null)
+        {
+
+            registroController.Modificar(registros);
+
+
+
+        }
+
+        else
+        {
+
+            Calcular();
+            registroController.Guardar(registros);
+
+            mensaje = "guardado ";
+            this.registros = new Registros();
+            Limpiar();
+
+        }
+
+    }
+    private void Calcular()
+    {
+        registros.Precio = (registros.Costo * registros.Ganancia/ 100) + registros.Costo;
+
+    }
+
+    public void Buscar()
+    {
+        RegistroController registroController = new RegistroController();
+        if(registroController.Buscar(registros.Id)!= null)
+        {
+            registros = registroController.Buscar(registros.Id);
+            registros.Fecha = registros.Fecha;
+            registros.Costo = registros.Costo;
+            registros.Descripcion = registros.Descripcion;
+            registros.Ganancia = registros.Ganancia;
+            registros.Precio = registros.Precio;
+
+        }
+    }
+
+    public void Eliminar()
+    {
+        RegistroController registroController = new RegistroController();
+        if (registros.Id > 0)
+        {
+            registroController.Eliminar(registros.Id);
+            mensaje = "Eliminado";
+            Limpiar();
+
+        }
+    }
+
+}
